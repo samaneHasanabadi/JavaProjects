@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ManagerService {
-
+//parisa
     private Connection connection = ConnectionRepository.connectionRepository.getConnection();
 
     public boolean checkUsername(String username){
