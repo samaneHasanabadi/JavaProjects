@@ -12,14 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ManagerService {
-<<<<<<< HEAD
-
     private Connection connection = ConnectionDao.connectionRepository.getConnection();
-=======
-//parisa
-    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
->>>>>>> 9d99ff4207b965aee4cf30c31547da27aeedf8cf
-
     public boolean checkUsername(String username){
         if(username.equals("01Manager01")){
             return true;

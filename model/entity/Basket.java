@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Basket {
 	private Map<Food, Integer> items = new HashMap<Food, Integer>();
-	private String resturant;
+	private String restaurantName;
 
 	public Map<Food, Integer> getItems() {
 		return items;
@@ -15,11 +15,11 @@ public class Basket {
 		this.items = items;
 	}
 
-	public String getResturant() {
-		return resturant;
+	public String getRestaurantName() {
+		return restaurantName;
 	}
 
-	public void setResturant(String resturant) {
-		this.resturant = resturant;
+	public void setRestaurantName(String restaurantName) {
+		this.restaurantName = restaurantName;
 	}
 }

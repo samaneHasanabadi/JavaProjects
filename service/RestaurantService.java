@@ -31,7 +31,8 @@ public class RestaurantService {
     }
     public void WriteRestaurantsInfoInDB() {
         try {
-            Reader fileReader = new FileReader("//home//samane//Homwork7-OnlineFoodOrder//restaurant.txt");
+            Reader fileReader = new FileReader("//home//samane//Homwork7-OnlineFoodOrder/" +
+                    "/restaurant.txt");
             BufferedReader bufferReader = new BufferedReader(fileReader);
             String line = bufferReader.readLine();
             int restaurantCount = Integer.parseInt(line);
@@ -88,28 +89,15 @@ public class RestaurantService {
         }
     }
 
-    public void getRestaurantsInRegionAndPrint(int region) {
+    public ArrayList<Restaurant> getRestaurantsInRegion(int region) {
         ArrayList<Restaurant> restaurants = restaurantRepository.getRestaurantsInARegion(connection, region);
-        for (Restaurant restaurant : restaurants) {
-            System.out.println("restaurant name: " + restaurant.getName() + ", Shipment price: "
-                    + restaurant.getShipmentPrice() + ", model.entity.Food Types: ");
-            for (FoodType ft : restaurant.getFoodTypes()) {
-                System.out.print(ft + ", ");
-            }
-            System.out.println();
-        }
+        return restaurants;
     }
 
-    public void getRestaurantsInRegionWithFoodTypeAndPrint(int region, String foodType) {
-        ArrayList<Restaurant> restaurants = restaurantRepository.getRestaurantsInARegionWithType(connection, region,
+    public ArrayList<Restaurant> getRestaurantsInRegionWithFoodType(int region, String foodType) {
+        ArrayList<Restaurant> restaurants = restaurantRepository.
+                getRestaurantsInARegionWithType(connection, region,
                 foodType);
-        for (Restaurant restaurant : restaurants) {
-            System.out.println("restaurant name: " + restaurant.getName() + ", Shipment price: "
-                    + restaurant.getShipmentPrice() + ", model.entity.Food Types: ");
-            for (FoodType ft : restaurant.getFoodTypes()) {
-                System.out.print(ft + ", ");
-            }
-            System.out.println();
-        }
+        return restaurants;
     }
 }
