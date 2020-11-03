@@ -1,10 +1,10 @@
 package service;
 
+import model.dao.UserDao;
 import model.entity.Food;
 import model.entity.Order;
 import model.entity.User;
-import model.repository.ConnectionRepository;
-import model.repository.UserRepository;
+import model.dao.ConnectionDao;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -14,8 +14,8 @@ import java.sql.Timestamp;
 import java.util.Set;
 
 public class UserService {
-    private UserRepository userRepository = new UserRepository();
-    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
+    private UserDao userRepository = new UserDao();
+    private Connection connection = ConnectionDao.connectionRepository.getConnection();
 
     public User getUserInfo(User user){
         return userRepository.getUserInfo(connection, user);

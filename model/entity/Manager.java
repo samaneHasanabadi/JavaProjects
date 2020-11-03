@@ -1,11 +1,5 @@
 package model.entity;
 
-import model.repository.ManagerRepository;
-
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Manager {
     private String username;
     private String password;

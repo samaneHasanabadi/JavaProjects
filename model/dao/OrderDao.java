@@ -1,4 +1,4 @@
-package model.repository;
+package model.dao;
 
 import model.entity.Food;
 import model.entity.Order;
@@ -13,7 +13,7 @@ import java.sql.Statement;
 import java.util.Iterator;
 import java.util.Set;
 
-public class OrderRepository {
+public class OrderDao {
 	Logger logger = LoggerFactory.getLogger(UserInteraction.class);
 	public int addOrder(Connection connection, Order order) {
 		Statement stm;

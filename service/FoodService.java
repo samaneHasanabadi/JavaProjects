@@ -1,17 +1,16 @@
 package service;
 
 import model.entity.Food;
-import model.entity.User;
-import model.repository.ConnectionRepository;
-import model.repository.FoodRepository;
+import model.dao.ConnectionDao;
+import model.dao.FoodDao;
 
 import java.sql.Connection;
 import java.util.ArrayList;
 
 public class FoodService {
 
-    FoodRepository foodRepository = new FoodRepository();
-    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
+    FoodDao foodRepository = new FoodDao();
+    private Connection connection = ConnectionDao.connectionRepository.getConnection();
 
     public void printFoodsOfARestaurant(String restaurantName) {
         ArrayList<Food> foods = foodRepository.getFoodsOFARestaurant(connection, restaurantName);

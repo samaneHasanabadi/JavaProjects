@@ -1,4 +1,4 @@
-package model.repository;
+package model.dao;
 
 import model.entity.Food;
 import model.entity.FoodType;
@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class RestaurantRepository {
+public class RestaurantDao {
 	Logger logger = LoggerFactory.getLogger(UserInteraction.class);
 	public int addRestaurant(Connection connection, Restaurant restaurant) {
 		Statement stm;
@@ -39,7 +39,7 @@ public class RestaurantRepository {
 
 	public int addFoodToRestaurant(Connection connection, ArrayList<Food> foods,
 								   String restaurantName) {
-		FoodRepository foodRepository = new FoodRepository();
+		FoodDao foodRepository = new FoodDao();
 		Statement stm;
 		int rows = 0;
 		for (int i = 0; i < foods.size(); i++) {
