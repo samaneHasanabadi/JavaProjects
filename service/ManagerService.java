@@ -58,19 +58,6 @@ public class ManagerService {
     public static void printRestaurantPeykIncomeAndFoodReport(List<Restaurant> restaurants,
                                                               int region, int minPeykIncome,
                                                               int maxPeykIncome){
-        /*restaurants.stream().filter(a->a.getRegion()==region).
-                filter(a->a.getOrdersNumber()*a.getShipmentPrice()>minPeykIncome)
-                .filter(a->a.getOrdersNumber()*a.getShipmentPrice()<maxPeykIncome).peek(a->System.out.
-                println("region: "+ a.getRegion() +" name: "+ a.getName()))
-                .map(a->a.getFoodAmountSold()).map(a->a.entrySet()).
-                forEach(System.out::println);
-        /*
-        restaurants.stream().filter(a->a.getRegion()==region).
-                filter(a->a.getOrdersNumber()*a.getShipmentPrice()>minPeykIncome)
-                .filter(a->a.getOrdersNumber()*a.getShipmentPrice()<maxPeykIncome).peek(a->System.out.
-                println("region: "+ a.getRegion() +" name: "+ a.getName()))
-                .map(a->a.getFoodAmountSold()).map(a->a.entrySet()).max((entry1, entry2) ->
-                entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();*/
         restaurants.stream().filter(a->a.getRegion()==region).
                 filter(a->a.getOrdersNumber()*a.getShipmentPrice()>minPeykIncome)
                 .filter(a->a.getOrdersNumber()*a.getShipmentPrice()<maxPeykIncome).peek(a->System.out.

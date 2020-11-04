@@ -30,40 +30,43 @@ public class UserService {
         userRepository.addUser(connection, user);
     }
 
-    public void addFoodToBasket(User user, Food food, int number, String restaurant) {
+    public boolean addFoodToBasket(User user, Food food, int number, String restaurant) {
+        boolean restaurentCheck = false;
         if (user.getBasket().getItems().isEmpty() || restaurant.equals(user.getBasket()
                 .getRestaurantName())) {
             user.getBasket().getItems().put(food, number);
             user.setBasketPrice(user.getBasketPrice() + food.getPrice() * number);
             user.getBasket().setRestaurantName(restaurant);
-            System.out.println(food.getName() + " is added to your basket successfully!");
-        } else {
-            System.out.println(
-                    "This food can not add to your basket because you have foods in your basket from" +
-                            " another restaurant");
+            restaurentCheck = true;
         }
+        return restaurentCheck;
     }
 
-    public void removeFoodFromBasket(User user,Food food) {
+    public boolean removeFoodFromBasket(User user,Food food) {
+        boolean success = false;
         try {
             user.setBasketPrice(user.getBasketPrice() - food.getPrice() * user.getBasket().
                     getItems().get(food));
             user.getBasket().getItems().remove(food);
-            System.out.println(food.getName() + " is removed from your basket successfully!");
+            success = true;
         } catch (NullPointerException e) {
-            System.out.println(food.getName() + " does not exist in your basket");
+            success = false;
         }
+        return success;
     }
 
-    public void modifyFoodNumberInBasket(User user,Food food, int newNumber) {
+    public boolean modifyFoodNumberInBasket(User user,Food food, int newNumber) {
+        boolean foodExistence = false;
         try {
             user.setBasketPrice(user.getBasketPrice() - food.getPrice() * user.getBasket()
                     .getItems().get(food));
             user.getBasket().getItems().put(food, newNumber);
             user.setBasketPrice(user.getBasketPrice() + food.getPrice() * newNumber);
+            foodExistence = true;
         } catch (NullPointerException e) {
-            System.out.println(food.getName() + " does not exist in your basket");
+            foodExistence = false;
         }
+        return foodExistence;
     }
 
     public Order setOrder(User user) {
@@ -112,7 +115,7 @@ public class UserService {
         }
     }
 
-    public void ClearBasket(User user){
+    public void clearBasket(User user){
         user.setBasket(new Basket());
         user.setBasketPrice(0);
     }

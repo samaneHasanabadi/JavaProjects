@@ -37,25 +37,25 @@ public class UserInteraction {
 				ArrayList<Restaurant> iraniRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "irani");
 				printRestaurants(iraniRestaurants);
-				temp = returnToPreviouseMenu(scanner, region);
+				temp = returnToPreviouseMenu(scanner);
 				break;
 			case "daryaee":
 				ArrayList<Restaurant> daryaeeRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "daryaee");
 				printRestaurants(daryaeeRestaurants);
-				temp = returnToPreviouseMenu(scanner, region);
+				temp = returnToPreviouseMenu(scanner);
 				break;
 			case "fastfood":
 				ArrayList<Restaurant> fastfoodRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "fastfood");
 				printRestaurants(fastfoodRestaurants);
-				temp = returnToPreviouseMenu(scanner, region);
+				temp = returnToPreviouseMenu(scanner);
 				break;
 			case "beinolmelali":
 				ArrayList<Restaurant> beinolmelaliRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "beinolmelali");
 				printRestaurants(beinolmelaliRestaurants);
-				temp = returnToPreviouseMenu(scanner, region);
+				temp = returnToPreviouseMenu(scanner);
 				break;
 			case "basket":
 				showBasket(scanner);
@@ -95,13 +95,19 @@ public class UserInteraction {
 								checker = false;
 								break;
 							default:
-								String finalTemp = temp;
-								if (foods.stream().anyMatch(a -> a.getName().equals(finalTemp))) {
+								String foodName = temp;
+								if (foods.stream().anyMatch(a -> a.getName().equals(foodName))) {
 									System.out.println("Please enter number of food");
 									num = scanner.nextLine();
 									int number = manageIntegerInputException(num, scanner);
-									Food food = foodService.getFoodByNameAndRestaurant(temp, restaurantName);
-									userService.addFoodToBasket(user, food, number, restaurantName);
+									Food food = foodService.getFoodByNameAndRestaurant(foodName, restaurantName);
+									boolean restaurantCheck = userService.addFoodToBasket(user, food, number, restaurantName);
+									if(restaurantCheck)
+										System.out.println(foodName + " is added to your basket successfully!");
+									else
+										System.out.println(
+												"This food can not add to your basket because you have foods in your basket" +
+														" from another restaurant");
 									printRestaurants(restaurants);
 									printSecondMenu();
 									checker = false;
@@ -118,18 +124,12 @@ public class UserInteraction {
 	}
 
 	private void printRestaurants(ArrayList<Restaurant> restaurants) {
-		restaurants.stream().forEach(restaurant->{restaurant.getFoods().stream().forEach(ft->System.out.print(ft + ", "));
+		restaurants.stream().forEach(restaurant->{
 			System.out.println("restaurant name: " + restaurant.getName() + ", Shipment price: "
 					+ restaurant.getShipmentPrice() + ", Food Types: ");
-			System.out.println();});
-		for (Restaurant restaurant : restaurants) {
-			System.out.println("restaurant name: " + restaurant.getName() + ", Shipment price: "
-					+ restaurant.getShipmentPrice() + ", Food Types: ");
-			for (FoodType ft : restaurant.getFoodTypes()) {
-				System.out.print(ft + ", ");
-			}
+			restaurant.getFoodTypes().stream().forEach(ft->System.out.print(ft + ", "));
 			System.out.println();
-		}
+		});
 	}
 
 	private void printRestaurantAndCheck(ArrayList<Restaurant> restaurants, Scanner scanner) {
@@ -144,10 +144,8 @@ public class UserInteraction {
 	}
 
 	private void prinFoods(ArrayList<Food> foods) {
-		for (Food food : foods) {
-			System.out.println(food.getName() + ", price: " + food.getPrice() + ", type: "
-					+ food.getType());
-		}
+		foods.stream().forEach(food->System.out.println(food.getName() + ", price: " +
+				food.getPrice() + ", type: " + food.getType()));
 	}
 
 	private void printFoodMenu() {
@@ -166,7 +164,7 @@ public class UserInteraction {
 				"to see your basket \n4.Enter \"exit\" to exit");
 	}
 
-	public String returnToPreviouseMenu(Scanner scanner, int region) {
+	public String returnToPreviouseMenu(Scanner scanner) {
 		System.out.println(
 				"1.Enter restaurant name \n2.Enter \"back\" to return to previouse menu \n3.Enter" +
 						" \"basket\" to see your basket\"");
@@ -188,10 +186,7 @@ public class UserInteraction {
 			System.out.println("Your basket is empty");
 			return;
 		}
-		for (Food basketItem : user.getBasket().getItems().keySet()) {
-			System.out.println(basketItem.getName() + ", price: " + basketItem.getPrice() + ", number:" +
-					" " + user.getBasket().getItems().get(basketItem));
-		}
+		printBasketItems(user);
 		System.out.println("Whole Price: " + user.getBasketPrice());
 		System.out.println("1.modify basket \n2.back to perviouse menu\n3.Finale your order");
 		String num = scanner.nextLine();
@@ -199,6 +194,7 @@ public class UserInteraction {
 		switch(choose) {
 		case 1:
 			modifyBasket(user, scanner);
+			printRestaurants(restaurants);
 		case 2:
 			return;
 		case 3:
@@ -215,10 +211,19 @@ public class UserInteraction {
 			Order order = userService.setOrder(user);
 			orderService.addOrderToDB(order);
 			userService.saveInvoice(user);
-
+			userService.clearBasket(user);
 			System.out.println("Your Order is ready");
 			break;
+			default:
+				System.out.println("please enter the right option");
+				showBasket(scanner);
 		}
+	}
+
+	private void printBasketItems(User user) {
+		user.getBasket().getItems().keySet().stream().forEach(basketItem->System.out.println
+				(basketItem.getName() + ", price: " + basketItem.getPrice() + ", number:" +
+						" " + user.getBasket().getItems().get(basketItem)));
 	}
 
 	private int manageIntegerInputException(String num, Scanner scanner) {
@@ -247,7 +252,11 @@ public class UserInteraction {
 			System.out.println("Enter food name");
 			String foodName = scanner.nextLine();
 			Food food = foodService.getFoodWithPriceNameAndRestaurant(foodName, restaurantName);
-			userService.removeFoodFromBasket(user, food);
+			boolean success = userService.removeFoodFromBasket(user, food);
+			if(success)
+				System.out.println(foodName+ " is removed from your basket successfully!");
+			else
+				System.out.println(foodName + " does not exist in your basket");
 			break;
 		case 2:
 			System.out.println("Enter food name");
@@ -256,11 +265,17 @@ public class UserInteraction {
 			System.out.println("Enter new number");
 			String num2 = scanner.nextLine();
 			int newNumber = manageIntegerInputException(num2, scanner);
-			userService.modifyFoodNumberInBasket(user, food, newNumber);
-			System.out.println("Your change is applied");
+			boolean foodExistence = userService.modifyFoodNumberInBasket(user, food, newNumber);
+			if(foodExistence)
+				System.out.println("Your change is applied");
+			else
+				System.out.println(foodName + " does not exist in your basket");
 			break;
+			default:
+				System.out.println("please enter the right option");
+				modifyBasket(user, scanner);
+				return;
 		}
 		showBasket(scanner);
 	}
-
 }
