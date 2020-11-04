@@ -100,14 +100,17 @@ public class UserInteraction {
 									System.out.println("Please enter number of food");
 									num = scanner.nextLine();
 									int number = manageIntegerInputException(num, scanner);
-									Food food = foodService.getFoodByNameAndRestaurant(foodName, restaurantName);
-									boolean restaurantCheck = userService.addFoodToBasket(user, food, number, restaurantName);
+									Food food = foodService.getFoodByNameAndRestaurant(foodName,
+											restaurantName);
+									boolean restaurantCheck = userService.addFoodToBasket(user,
+											food, number, restaurantName);
 									if(restaurantCheck)
-										System.out.println(foodName + " is added to your basket successfully!");
+										System.out.println(foodName + " is added to your basket " +
+												"successfully!");
 									else
 										System.out.println(
-												"This food can not add to your basket because you have foods in your basket" +
-														" from another restaurant");
+												"This food can not add to your basket because you have" +
+														" foods in your basket from another restaurant");
 									printRestaurants(restaurants);
 									printSecondMenu();
 									checker = false;
