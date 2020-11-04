@@ -2,8 +2,8 @@ package service;
 
 import model.entity.Restaurant;
 import model.entity.User;
-import model.dao.ConnectionDao;
-import model.dao.ManagerDao;
+import model.Repository.ConnectionRepository;
+import model.Repository.ManagerRepository;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ManagerService {
-    private Connection connection = ConnectionDao.connectionRepository.getConnection();
+    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
     public boolean checkUsername(String username){
         if(username.equals("01Manager01")){
             return true;
@@ -20,7 +20,7 @@ public class ManagerService {
         return false;
     }
     public void reportUsersWithMonthRegisterationAndSumOfOrderPrice(){
-        ManagerDao managerRepository = new ManagerDao();
+        ManagerRepository managerRepository = new ManagerRepository();
         for (int i = 1; i < 13; i++){
             ArrayList<User> users = managerRepository.
                     getUsersWithMonthRegisterationAndSumOfOrderPrice(connection);
@@ -38,7 +38,7 @@ public class ManagerService {
     }
 
     public void reportRestaurantPeykIncomeAndFoodSoldNumber(){
-        ManagerDao managerRepository = new ManagerDao();
+        ManagerRepository managerRepository = new ManagerRepository();
         List<Restaurant> restaurants = managerRepository.
                 getRestaurantsWithPeykIncomeAndFoodSold(connection);
         printRestaurantPeykIncomeAndFoodReport(restaurants, 4, 0,

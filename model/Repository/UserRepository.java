@@ -1,4 +1,4 @@
-package model.dao;
+package model.Repository;
 
 import model.entity.User;
 import org.slf4j.Logger;
@@ -7,7 +7,7 @@ import view.UserInteraction;
 
 import java.sql.*;
 
-public class UserDao {
+public class UserRepository {
 	Logger logger = LoggerFactory.getLogger(UserInteraction.class);
 	public int addUser(Connection connection, User user) {
 		Statement stm;

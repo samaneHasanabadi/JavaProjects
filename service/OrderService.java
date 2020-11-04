@@ -1,14 +1,14 @@
 package service;
 
-import model.dao.OrderDao;
+import model.Repository.OrderRepository;
 import model.entity.Order;
-import model.dao.ConnectionDao;
+import model.Repository.ConnectionRepository;
 
 import java.sql.Connection;
 
 public class OrderService {
-    private OrderDao orderRepository = new OrderDao();
-    private Connection connection = ConnectionDao.connectionRepository.getConnection();
+    private OrderRepository orderRepository = new OrderRepository();
+    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
 
     public void addOrderToDB(Order order){
         orderRepository.addOrder(connection, order);

@@ -1,10 +1,10 @@
 package service;
 
-import model.dao.ConnectionDao;
+import model.Repository.ConnectionRepository;
 import model.entity.Food;
 import model.entity.FoodType;
 import model.entity.Restaurant;
-import model.dao.RestaurantDao;
+import model.Repository.RestaurantRepository;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,8 +14,8 @@ import java.sql.Connection;
 import java.util.ArrayList;
 
 public class RestaurantService {
-    private RestaurantDao restaurantRepository = new RestaurantDao();
-    private Connection connection = ConnectionDao.connectionRepository.getConnection();
+    private RestaurantRepository restaurantRepository = new RestaurantRepository();
+    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
 
     public String[] subStringReturn(String line) {
         int endIndex = 0;

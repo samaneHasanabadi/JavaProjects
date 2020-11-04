@@ -118,6 +118,10 @@ public class UserInteraction {
 	}
 
 	private void printRestaurants(ArrayList<Restaurant> restaurants) {
+		restaurants.stream().forEach(restaurant->{restaurant.getFoods().stream().forEach(ft->System.out.print(ft + ", "));
+			System.out.println("restaurant name: " + restaurant.getName() + ", Shipment price: "
+					+ restaurant.getShipmentPrice() + ", Food Types: ");
+			System.out.println();});
 		for (Restaurant restaurant : restaurants) {
 			System.out.println("restaurant name: " + restaurant.getName() + ", Shipment price: "
 					+ restaurant.getShipmentPrice() + ", Food Types: ");

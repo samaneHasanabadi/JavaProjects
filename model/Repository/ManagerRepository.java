@@ -1,4 +1,4 @@
-package model.dao;
+package model.Repository;
 
 import model.entity.Food;
 import model.entity.Restaurant;
@@ -11,7 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ManagerDao {
+public class ManagerRepository {
 
     public ArrayList<User> getUsersWithMonthRegisterationAndSumOfOrderPrice(Connection connection){
         ArrayList<User> users = null;
