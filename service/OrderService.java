@@ -1,16 +1,12 @@
 package service;
 
-import model.Repository.OrderRepository;
-import model.entity.Order;
-import model.Repository.ConnectionRepository;
-
-import java.sql.Connection;
+import model.repository.OrderRepository;
+import model.entity.OrderClass;
 
 public class OrderService {
     private OrderRepository orderRepository = new OrderRepository();
-    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
 
-    public void addOrderToDB(Order order){
-        orderRepository.addOrder(connection, order);
+    public void addOrderToDB(OrderClass order){
+        orderRepository.addOrder(order);
     }
 }

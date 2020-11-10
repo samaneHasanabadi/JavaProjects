@@ -1,11 +1,15 @@
 package view;
 
 import model.entity.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.*;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
 public class UserInteraction {
@@ -15,14 +19,12 @@ public class UserInteraction {
 	UserService userService = new UserService();
 	String restaurantName = "";
 	OrderService orderService = new OrderService();
-	ArrayList<Restaurant> restaurants;
-	//Logger logger = LoggerFactory.getLogger(Main.class);
+	List<Restaurant> restaurants;
+	 Logger logger = LoggerFactory.getLogger(UserInteraction.class);
 	public void userWorks (String mobileNumber) {
-		//restaurantService.WriteRestaurantsInfoInDB();
+		restaurantService.WriteRestaurantsInfoInDB();
 		Scanner scanner = new Scanner(System.in);
-		user = new User();
-		user.setMobileNumber(mobileNumber);
-		userService.addUserToDB(user);
+		defineUserAndAddToDb(mobileNumber);
 		System.out.println("please enter your region");
 		String num = scanner.nextLine();
 		int region = manageIntegerInputException(num, scanner);
@@ -34,25 +36,25 @@ public class UserInteraction {
 		while (bool) {
 			switch (temp) {
 			case "irani":
-				ArrayList<Restaurant> iraniRestaurants =
+				List<Restaurant> iraniRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "irani");
 				printRestaurants(iraniRestaurants);
 				temp = returnToPreviouseMenu(scanner);
 				break;
 			case "daryaee":
-				ArrayList<Restaurant> daryaeeRestaurants =
+				List<Restaurant> daryaeeRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "daryaee");
 				printRestaurants(daryaeeRestaurants);
 				temp = returnToPreviouseMenu(scanner);
 				break;
 			case "fastfood":
-				ArrayList<Restaurant> fastfoodRestaurants =
+				List<Restaurant> fastfoodRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "fastfood");
 				printRestaurants(fastfoodRestaurants);
 				temp = returnToPreviouseMenu(scanner);
 				break;
 			case "beinolmelali":
-				ArrayList<Restaurant> beinolmelaliRestaurants =
+				List<Restaurant> beinolmelaliRestaurants =
 						restaurantService.getRestaurantsInRegionWithFoodType(region, "beinolmelali");
 				printRestaurants(beinolmelaliRestaurants);
 				temp = returnToPreviouseMenu(scanner);
@@ -68,7 +70,7 @@ public class UserInteraction {
 				break;
 			default:
 				restaurantName = temp;
-				ArrayList<Food> foods = foodService.getFoodsOfARestaurant(temp);
+				List<Food> foods = foodService.getFoodsOfARestaurant(temp);
 				if(foods.size() == 0){
 					System.out.println("invalid input");
 					printRestaurants(restaurants);;
@@ -126,7 +128,15 @@ public class UserInteraction {
 
 	}
 
-	private void printRestaurants(ArrayList<Restaurant> restaurants) {
+	private void defineUserAndAddToDb(String mobileNumber) {
+		user = new User();
+		user.setMobileNumber(mobileNumber);
+		Date date = new Date();
+		user.setRegMonth(date.getMonth());
+		userService.addUserToDB(user);
+	}
+
+	private void printRestaurants(List<Restaurant> restaurants) {
 		restaurants.stream().forEach(restaurant->{
 			System.out.println("restaurant name: " + restaurant.getName() + ", Shipment price: "
 					+ restaurant.getShipmentPrice() + ", Food Types: ");
@@ -135,7 +145,7 @@ public class UserInteraction {
 		});
 	}
 
-	private void printRestaurantAndCheck(ArrayList<Restaurant> restaurants, Scanner scanner) {
+	private void printRestaurantAndCheck(List<Restaurant> restaurants, Scanner scanner) {
 		while (restaurants.size()==0) {
 			System.out.println("There is no restaurant in this region please enter a valid region number" +
 					"or another region");
@@ -146,7 +156,7 @@ public class UserInteraction {
 		printRestaurants(restaurants);
 	}
 
-	private void prinFoods(ArrayList<Food> foods) {
+	private void prinFoods(List<Food> foods) {
 		foods.stream().forEach(food->System.out.println(food.getName() + ", price: " +
 				food.getPrice() + ", type: " + food.getType()));
 	}
@@ -211,8 +221,9 @@ public class UserInteraction {
 				user.setPostalCode(scanner.nextLine());
 				userService.setUserInfo(user);
 			}
-			Order order = userService.setOrder(user);
+			OrderClass order = userService.setOrder(user);
 			orderService.addOrderToDB(order);
+			userService.addOrderToUser(user, order);
 			userService.saveInvoice(user);
 			userService.clearBasket(user);
 			System.out.println("Your Order is ready");

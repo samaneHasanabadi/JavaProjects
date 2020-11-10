@@ -1,29 +1,30 @@
 package service;
 
 import model.entity.Food;
-import model.Repository.ConnectionRepository;
-import model.Repository.FoodRepository;
+import model.repository.*;
 
-import java.sql.Connection;
-import java.util.ArrayList;
+import java.util.List;
 
 public class FoodService {
 
     FoodRepository foodRepository = new FoodRepository();
-    private Connection connection = ConnectionRepository.connectionRepository.getConnection();
 
-    public ArrayList<Food> getFoodsOfARestaurant(String restaurantName) {
-        ArrayList<Food> foods = foodRepository.getFoodsOFARestaurant(connection, restaurantName);
+    public List<Food> getFoodsOfARestaurant(String restaurantName) {
+        List<Food> foods = foodRepository.getFoodsOFARestaurant(restaurantName);
         return foods;
     }
 
     public Food getFoodByNameAndRestaurant(String foodName, String restaurantName) {
-        Food food = foodRepository.getFoodWithPrice(connection, foodName, restaurantName);
+        Food food = foodRepository.getFoodByNameAndRestaurant(foodName, restaurantName);
         return food;
     }
 
     public Food getFoodWithPriceNameAndRestaurant(String foodName, String restaurantName){
-        return foodRepository.getFoodWithPrice(connection, foodName, restaurantName);
+        return foodRepository.getFoodByNameAndRestaurant(foodName, restaurantName);
+    }
+
+    public void addFood(Food food){
+        foodRepository.addFood(food);
     }
 
 }

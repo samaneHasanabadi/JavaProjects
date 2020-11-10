@@ -1,12 +1,14 @@
 package model.entity;
 
-import model.entity.Basket;
-import model.entity.Food;
-import model.entity.Order;
-
+import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.List;
 
+@Entity
 public class User {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 	private String name;
 	private String postalCode;
 	private String address;
@@ -14,8 +16,25 @@ public class User {
 	private int ordersSumPrice;
 	private int regMonth;
 	private int basketPrice;
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	private Basket basket = new Basket();
-	private ArrayList<Order> orders = new ArrayList<Order>();
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+	private List<OrderClass> orders = new ArrayList<>();
+
+	public User() {
+	}
+
+	public void setOrders(List<OrderClass> orders) {
+		this.orders = orders;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return name;
@@ -80,11 +99,11 @@ public class User {
 		this.basket = basket;
 	}
 
-	public ArrayList<Order> getOrders() {
+	public List<OrderClass> getOrders() {
 		return orders;
 	}
 
-	public void setOrders(ArrayList<Order> orders) {
+	public void setOrders(ArrayList<OrderClass> orders) {
 		this.orders = orders;
 	}
 

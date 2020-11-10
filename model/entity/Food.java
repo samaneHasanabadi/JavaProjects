@@ -1,10 +1,20 @@
 package model.entity;
 
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
 public class Food {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 	private String name;
 	private int price;
+	@Enumerated(value = EnumType.STRING)
 	private FoodType type;
-	private int numberSold;
+	@ManyToMany(mappedBy = "foods")
+	private List<Restaurant> restaurants = new ArrayList<>();
 
 
 	public Food(String name, int price, FoodType type) {
@@ -17,12 +27,12 @@ public class Food {
 
 	}
 
-	public int getNumberSold() {
-		return numberSold;
+	public int getId() {
+		return id;
 	}
 
-	public void setNumberSold(int numberSold) {
-		this.numberSold = numberSold;
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getName() {
@@ -47,6 +57,14 @@ public class Food {
 
 	public void setType(FoodType type) {
 		this.type = type;
+	}
+
+	public List<Restaurant> getRestaurants() {
+		return restaurants;
+	}
+
+	public void setRestaurants(List<Restaurant> restaurants) {
+		this.restaurants = restaurants;
 	}
 
 	@Override

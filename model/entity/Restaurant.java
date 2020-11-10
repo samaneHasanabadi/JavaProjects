@@ -1,16 +1,23 @@
 package model.entity;
+import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+@Entity
 public class Restaurant {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 	private String name;
 	private int region;
 	private int shipmentPrice;
-	private int ordersNumber;
-	private ArrayList<FoodType> foodTypes = new ArrayList<FoodType>();
-	private ArrayList<Food> foods = new ArrayList<Food>();
-	private Map<Food,Integer> foodAmountSold = new HashMap<>();
+	@OneToMany(mappedBy = "restaurant",cascade = CascadeType.ALL)
+	private List<OrderClass> orders = new ArrayList<>();
+	@ElementCollection(targetClass = FoodType.class)
+	@Enumerated(EnumType.STRING)
+	private List<FoodType> foodTypes = new ArrayList<>();
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<Food> foods = new ArrayList<>();
 
 	public Restaurant(){
 
@@ -22,22 +29,26 @@ public class Restaurant {
 		this.shipmentPrice = shipmentPrice;
 	}
 
-	public Map<Food, Integer> getFoodAmountSold() {
-		return foodAmountSold;
+	public void setFoodTypes(List<FoodType> foodTypes) {
+		this.foodTypes = foodTypes;
 	}
 
-	public void setFoodAmountSold(Map<Food, Integer> foodAmountSold) {
-		this.foodAmountSold = foodAmountSold;
+	public void setFoods(List<Food> foods) {
+		this.foods = foods;
 	}
 
-	public int getOrdersNumber() {
-		return ordersNumber;
+	public int getId() {
+		return id;
 	}
 
-	public void setOrdersNumber(int ordersNumber) {
-		this.ordersNumber = ordersNumber;
+	public void setId(int id) {
+		this.id = id;
 	}
-	
+
+	public void setFoodTypes(ArrayList<FoodType> foodTypes) {
+		this.foodTypes = foodTypes;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -62,12 +73,19 @@ public class Restaurant {
 		this.shipmentPrice = shipmentPrice;
 	}
 	
-	public ArrayList<FoodType> getFoodTypes() {
+	public List<FoodType> getFoodTypes() {
 		return foodTypes;
 	}
-	
-	public ArrayList<Food> getFoods() {
+
+	public List<Food> getFoods() {
 		return foods;
 	}
 
+	public List<OrderClass> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(List<OrderClass> orders) {
+		this.orders = orders;
+	}
 }
