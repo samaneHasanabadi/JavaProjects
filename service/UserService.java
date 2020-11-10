@@ -69,6 +69,7 @@ public class UserService {
             FoodCountMapping foodCountMapping = new FoodCountMapping();
             foodCountMapping.setFood(a.getKey());
             foodCountMapping.setNumber(a.getValue());
+            foodCountMapping.setOrderClass(order);
             order.getItems().add(foodCountMapping);
         });
         order.setOrderNumber((int)Math.random()*1000);

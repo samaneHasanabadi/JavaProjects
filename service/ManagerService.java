@@ -62,6 +62,6 @@ public class ManagerService {
                 .filter(a->a.getKey().getOrders().size()*a.getKey().getShipmentPrice()<maxPeykIncome).
                 peek(a->System.out.println("region: "+ a.getKey().getRegion() +" name: "+ a.getKey().
                         getName())).forEach(a-> System.out.println(a.getValue().stream()
-                        .max(Comparator.comparingLong(b->b.getNumberSold())).get().getFood().getName()));
+                        .max(Comparator.comparingLong(OrderDto::getNumberSold)).get().getFood().getName()));
     }
 }

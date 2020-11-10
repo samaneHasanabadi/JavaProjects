@@ -22,7 +22,7 @@ public class UserInteraction {
 	List<Restaurant> restaurants;
 	 Logger logger = LoggerFactory.getLogger(UserInteraction.class);
 	public void userWorks (String mobileNumber) {
-		restaurantService.WriteRestaurantsInfoInDB();
+		//restaurantService.WriteRestaurantsInfoInDB();
 		Scanner scanner = new Scanner(System.in);
 		defineUserAndAddToDb(mobileNumber);
 		System.out.println("please enter your region");
