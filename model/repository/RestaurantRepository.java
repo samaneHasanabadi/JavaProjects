@@ -18,25 +18,23 @@ public class RestaurantRepository extends CRUDOperation<Restaurant> {
 
     public List<Restaurant> getRestaurantsInARegion(int region) {
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Query query = session.createQuery("from Restaurant restaurant where restaurant.region =:region",
+        Query query = session.createQuery("select distinct restaurant from Restaurant " +
+                "restaurant join fetch restaurant.foodTypes where restaurant.region =:region",
                 Restaurant.class);
         query.setParameter("region", region);
         List<Restaurant> restaurants = query.list();
-        restaurants.forEach(restaurant -> restaurant.getFoodTypes().forEach(foodType ->
-                System.out.println(foodType)));
-        session.close();
         return restaurants;
     }
 
     public List<Restaurant> getRestaurantsInARegionWithType(int region, String foodType) {
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Query<Restaurant> query = session.createQuery("from Restaurant restaurant " +
-                " where restaurant.region =: r", Restaurant.class);
+        Query<Restaurant> query = session.createQuery("select distinct restaurant from " +
+                "Restaurant restaurant join fetch restaurant.foodTypes join" +
+                " restaurant.foods food where restaurant.region =: r and food.type =: type"
+                , Restaurant.class);
         query.setParameter("r", region);
+        query.setParameter("type", FoodType.valueOf(foodType));
         List<Restaurant> restaurants = query.list();
-        List<Restaurant> restaurantList = restaurants.stream().filter(restaurant ->
-                restaurant.getFoodTypes().stream().anyMatch(foodType1 -> foodType1.
-                        equals(FoodType.valueOf(foodType)))).collect(Collectors.toList());
         session.close();
         return restaurants;
     }

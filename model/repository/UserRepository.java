@@ -1,6 +1,5 @@
 package model.repository;
 
-import model.dto.UserDto;
 import model.entity.User;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
