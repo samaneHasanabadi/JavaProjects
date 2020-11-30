@@ -8,7 +8,6 @@ import model.repository.RestaurantRepository;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
@@ -43,14 +42,11 @@ public class RestaurantService {
     }
     public void WriteRestaurantsInfoInDB() throws Exception {
         try {
-            System.out.println("in");
             Reader fileReader = new FileReader("//home//samane//Homwork7-OnlineFoodOrder" +
                     "//restaurants.txt");
-            System.out.println("in");
             BufferedReader bufferReader = new BufferedReader(fileReader);
             String line = bufferReader.readLine();
             int restaurantCount = Integer.parseInt(line);
-            System.out.println(restaurantCount);
             line = bufferReader.readLine();
             for (int i = 0; i < restaurantCount; i++) {
                 String[] result = subStringReturn(line);
@@ -77,13 +73,8 @@ public class RestaurantService {
                     food.setName(foodName);
                     food.setType(type);
                     food.setPrice(price);
-                    System.out.println("in");
-                    System.out.println(food.getName());
-                    System.out.println(restaurant.getName());
                     addFood(restaurant, food);
-                    System.out.println("out");
                 }
-                System.out.println("in");
                 save(restaurant);
                 line = bufferReader.readLine();
             }
