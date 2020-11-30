@@ -1,54 +1,80 @@
 package model.repository;
 
+import model.dto.BasketDto;
 import model.dto.OrderDto;
 import model.entity.Manager;
-import model.entity.OrderClass;
 import model.entity.Restaurant;
-import model.entity.User;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ManagerRepository extends CRUDOperation<Manager> {
 
-    public List<User> getUsersWithMonthRegisterationAndSumOfOrderPrice(){
+    public List<BasketDto> getUsersWithSumOfOrdersPrice(){
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Query query = session.createQuery("select sum(o.wholePrice), u from " +
-                "OrderClass o join o.user u group by o.user");
-        List<Object[]> list = query.list();
-        List<User> users = new ArrayList<>();
-        list.stream().forEach(o -> {
-            ((User) o[1]).setOrdersSumPrice(((Long) o[0]).intValue());
-            users.add((User) o[1]);
-        });
-        return users;
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery(getQueryForUserSumOrdersPrice());
+        List<BasketDto> orders = query.setResultTransformer(
+                Transformers.aliasToBean(BasketDto.class)).list();
+        transaction.commit();
+        session.close();
+        return orders;
     }
 
-    public Map<Restaurant, List<OrderDto>> getRestaurantsWithPeykIncomeAndFoodSold(){
-        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Query query = session.createQuery("select distinct restaurant from Restaurant restaurant" +
-                " join fetch restaurant.orders");
-        List<Restaurant> list = query.list();
-        Map<Restaurant, List<OrderDto>> restaurantFoodSoldMap = new HashMap<>();
-        list.forEach(a -> {
-            Query query1 = session.createQuery("select i.food as food, sum(i.number) as" +
-                    " numberSold from OrderClass o join o.items i where o.restaurant.id =:id " +
-                        "group by i.food");
-            query1.setParameter("id", a.getId());
-            List<OrderDto> list2 = query1.setResultTransformer(
-            Transformers.aliasToBean(OrderDto.class)).list();
-            restaurantFoodSoldMap.put(a, list2);
+    private String getQueryForUserSumOrdersPrice() {
+        return "select sum(user.basket.wholePrice) as sumOfOrdersPrice, user as user from " +
+                "User user where user.basket.isInvoiced=true " +
+                "group by user.id";
+    }
+
+    public Map<Restaurant,List<OrderDto>> getSumOfFoodSoldInEachRestaurant(){
+        HashMap<Restaurant, List<OrderDto>> restaurantsMapFood = new HashMap<>();
+        List<Restaurant> restaurants = new RestaurantRepository().selectAll();
+        restaurants.stream().forEach(restaurant -> {
+            restaurant.setNumberOfOrders(getNumberOfOrdersOfRestaurant(restaurant.getId()));
+            List<OrderDto> orders = getSumOfFoodOrderForRestaurant(restaurant.getId());
+            restaurantsMapFood.put(restaurant, orders);
         });
-        /*Query query1 = session.createQuery("select sum(VALUE(items)), key(items) from Basket basket join" +
-                " basket.items items where key(items).name=: foodName group by key(items) ");
-        query1.setParameter("foodName","Morghe sookhari");
-        List list1 = query1.list();*/
+        return restaurantsMapFood;
+    }
+
+    private int getNumberOfOrdersOfRestaurant(int restaurantId) {
+        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery(getQueryForNumberOfOrders());
+        query.setParameter("restaurantId", restaurantId);
+        int numberOfOrders = ((Long) query.uniqueResult()).intValue();
+        transaction.commit();
         session.close();
-        return restaurantFoodSoldMap;
+        return numberOfOrders;
+    }
+
+    private String getQueryForNumberOfOrders() {
+        return "select count(*) from Basket " +
+                "basket where basket.restaurant.id =:restaurantId";
+    }
+
+    private List<OrderDto> getSumOfFoodOrderForRestaurant(int restaurantId) {
+        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery(getQueryForSumOfFood());
+        query.setParameter("restaurantId", 4);
+        query.setResultTransformer(Transformers.aliasToBean(OrderDto.class));
+        List<OrderDto> orders = query.list();
+        System.out.println(orders.get(0).getFood().getName());
+        transaction.commit();
+        session.close();
+        return orders;
+    }
+
+    private String getQueryForSumOfFood() {
+        return "select sum(VALUE(items)) as sumOfFoodSold, key(items) as food from" +
+                " Basket basket join basket.items items where basket.isInvoiced= true and " +
+                "basket.restaurant.id = :restaurantId group by key(items).id ";
     }
 
 }

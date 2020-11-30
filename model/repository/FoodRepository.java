@@ -3,19 +3,12 @@ package model.repository;
 import model.entity.Food;
 import model.entity.Restaurant;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import view.UserInteraction;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 public class FoodRepository extends CRUDOperation<Food> {
-
-    Logger logger = LoggerFactory.getLogger(UserInteraction.class);
 
     public void addFood(Food food) {
         creat(food);
@@ -23,30 +16,39 @@ public class FoodRepository extends CRUDOperation<Food> {
 
     public List<Food> getFoodsOFARestaurant(String restaurantName) {
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        logger.trace("session opened");
-        Query query = session.createQuery("from Restaurant restaurant " +
-                "where restaurant.name = :n");
-        query.setParameter("n",restaurantName);
-        List<Restaurant> restaurants = (List<Restaurant>) query.list();
-        List<Food> foods = new ArrayList<>();
-        if(restaurants != null && !restaurants.isEmpty())
-            foods = restaurants.get(0).getFoods();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery(getReadyQueryWithRestaurantName());
+        query.setParameter("restaurantName",restaurantName);
+        Restaurant restaurant = (Restaurant) query.uniqueResult();
+        transaction.commit();
         session.close();
-        logger.trace("session closed");
-        return foods;
+        return restaurant.getFoods();
+    }
+
+    private String getReadyQueryWithRestaurantName() {
+        return "from Restaurant restaurant join fetch restaurant.foods" +
+                " where restaurant.name = :restaurantName";
     }
 
     public Food getFoodByNameAndRestaurant(String foodName, String restaurantName) {
-        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        logger.trace("session opened");
-        Query query = session.createQuery("from Restaurant restaurant" +
-                " where restaurant.name = :n", Restaurant.class);
-        query.setParameter("n",restaurantName);
-        List<Restaurant> restaurants = (List<Restaurant>) query.list();
+        Session session = DatabaseConnection.connectionRepository.getSessionFactory()
+                .openSession();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery("select distinct food from Restaurant restaurant join" +
+                " restaurant.foods food where restaurant.name =:restaurantName and " +
+                "food.name =:foodName");
+        query.setParameter("restaurantName",restaurantName);
+        query.setParameter("foodName", foodName);
+        Food food = (Food) query.uniqueResult();
+        transaction.commit();
         session.close();
-        logger.trace("session closed");
-        return restaurants.get(0).getFoods().stream().filter(food -> food.getName().equals(foodName))
-                .collect(Collectors.toList()).get(0);
+        return food;
+    }
+
+    public String getReadyQueryWithFoodAndRestaurant(){
+        return "select Food from Restaurant restaurant join" +
+                " fetch restaurant.foods food where restaurant.name = :restaurantName and " +
+                "food.name =: foodName";
     }
 
 }

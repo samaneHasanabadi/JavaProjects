@@ -1,13 +1,11 @@
 package service;
 
+import model.dto.BasketDto;
 import model.dto.OrderDto;
 import model.entity.Restaurant;
-import model.entity.User;
 import model.repository.ManagerRepository;
 
-import javax.persistence.SecondaryTable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ManagerService {
 
@@ -21,47 +19,59 @@ public class ManagerService {
     public void reportUsersWithMonthRegisterationAndSumOfOrderPrice(){
         ManagerRepository managerRepository = new ManagerRepository();
         for (int i = 1; i < 13; i++){
-            List<User> users = managerRepository.
-                    getUsersWithMonthRegisterationAndSumOfOrderPrice();
-            printUserReport(users, i, 0, 100001);
-            printUserReport(users, i, 100000, 500001);
-            printUserReport(users, i, 500000, 1500001);
+            List<BasketDto> orders = managerRepository.
+                    getUsersWithSumOfOrdersPrice();
+            printUserReport(orders, i, 0, 100001);
+            printUserReport(orders, i, 100000, 500001);
+            printUserReport(orders, i, 500000, 1500001);
         }
     }
 
-    public void printUserReport(List<User> users, int month, int minSum, int maxSum){
+    public void printUserReport(List<BasketDto> orders, int month, int minSum, int maxSum){
         System.out.println("Month: " + month);
         System.out.println("Sum of Orders Prices between " + minSum +" and " + maxSum);
-        users.stream().filter(a->a.getOrdersSumPrice()>minSum).filter(a->a.getOrdersSumPrice()<maxSum)
-                .filter(a->a.getRegMonth()==month).forEach(System.out::println);
+        orders.stream().filter(order->order.getSumOfOrdersPrice()>minSum)
+                .filter(order->order.getSumOfOrdersPrice()<maxSum)
+                .filter(order->order.getUser().getRegMonth()==month).map(BasketDto::getUser)
+                .forEach(System.out::println);
     }
 
-    public void reportRestaurantPeykIncomeAndFoodSoldNumber(){
+    public void reportRestaurantDeliveryIncomeAndFoodSoldNumber(){
         ManagerRepository managerRepository = new ManagerRepository();
         Map<Restaurant,List<OrderDto>> restaurants = managerRepository.
-                getRestaurantsWithPeykIncomeAndFoodSold();
-        printRestaurantPeykIncomeAndFoodReport(restaurants, 4, 0,
+                getSumOfFoodSoldInEachRestaurant();
+        printRestaurantDeliveryIncomeAndFoodReport(restaurants, 4, 0,
                 10001);
-        printRestaurantPeykIncomeAndFoodReport(restaurants, 4, 10000,
+        printRestaurantDeliveryIncomeAndFoodReport(restaurants, 4, 10000,
                 20001);
-        printRestaurantPeykIncomeAndFoodReport(restaurants, 4, 20000,
+        printRestaurantDeliveryIncomeAndFoodReport(restaurants, 4, 20000,
                 100001);
-        printRestaurantPeykIncomeAndFoodReport(restaurants, 5, 0,
+        printRestaurantDeliveryIncomeAndFoodReport(restaurants, 5, 0,
                 10001);
-        printRestaurantPeykIncomeAndFoodReport(restaurants, 5, 10000,
+        printRestaurantDeliveryIncomeAndFoodReport(restaurants, 5, 10000,
                 20001);
-        printRestaurantPeykIncomeAndFoodReport(restaurants, 5, 20000,
-                100001);
+        printRestaurantDeliveryIncomeAndFoodReport(restaurants, 5, 20000,
+                10000001);
     }
 
-    public static void printRestaurantPeykIncomeAndFoodReport(Map<Restaurant,List<OrderDto>> restaurants,
-                                                              int region, int minPeykIncome,
-                                                              int maxPeykIncome){
-        restaurants.entrySet().stream().filter(a->a.getKey().getRegion()==region).
-                filter(a->a.getKey().getOrders().size()*a.getKey().getShipmentPrice()>minPeykIncome)
-                .filter(a->a.getKey().getOrders().size()*a.getKey().getShipmentPrice()<maxPeykIncome).
-                peek(a->System.out.println("region: "+ a.getKey().getRegion() +" name: "+ a.getKey().
-                        getName())).forEach(a-> System.out.println(a.getValue().stream()
-                        .max(Comparator.comparingLong(OrderDto::getNumberSold)).get().getFood().getName()));
+    public static void printRestaurantDeliveryIncomeAndFoodReport(Map<Restaurant,List<OrderDto>> restaurants,
+                                                                  int region, int minDeliveryIncome,
+                                                                  int maxDeliveryIncome){
+        Optional<Restaurant> restaurant = getRestaurantWithMaxDeliveryIncome(restaurants, region, minDeliveryIncome, maxDeliveryIncome);
+        restaurant.ifPresent(restaurant1 -> {
+            System.out.println("region: "+ restaurant1.getRegion() +" name: "+ restaurant1.getName());
+            getFoodReportOfTheRestaurant(restaurants, restaurant);
+        });
+    }
+
+    private static void getFoodReportOfTheRestaurant(Map<Restaurant, List<OrderDto>> restaurants, Optional<Restaurant> restaurant) {
+        restaurants.entrySet().stream().filter(entry -> entry.getKey().getName().equals(restaurant.get().getName())).forEach(entry -> System.out.println(entry.getValue().stream()
+                       .max(Comparator.comparingLong(OrderDto::getSumOfFoodSold)).get().getFood().getName()));
+    }
+
+    private static Optional<Restaurant> getRestaurantWithMaxDeliveryIncome(Map<Restaurant, List<OrderDto>> restaurants, int region, int minDeliveryIncome, int maxDeliveryIncome) {
+        return restaurants.keySet().stream().filter(restaurant -> restaurant.getRegion() == region).
+                filter(restaurant -> restaurant.getNumberOfOrders() * restaurant.getDeliveryAmount() > minDeliveryIncome)
+                .filter(restaurant -> restaurant.getNumberOfOrders() * restaurant.getDeliveryAmount() < maxDeliveryIncome).max(Comparator.comparingInt(Restaurant::getDeliveryIncome));
     }
 }

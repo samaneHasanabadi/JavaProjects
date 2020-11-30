@@ -13,8 +13,6 @@ public class Food {
 	private int price;
 	@Enumerated(value = EnumType.STRING)
 	private FoodType type;
-	@ManyToMany(mappedBy = "foods")
-	private List<Restaurant> restaurants = new ArrayList<>();
 
 
 	public Food(String name, int price, FoodType type) {
@@ -57,14 +55,6 @@ public class Food {
 
 	public void setType(FoodType type) {
 		this.type = type;
-	}
-
-	public List<Restaurant> getRestaurants() {
-		return restaurants;
-	}
-
-	public void setRestaurants(List<Restaurant> restaurants) {
-		this.restaurants = restaurants;
 	}
 
 	@Override

@@ -50,7 +50,7 @@ public class CRUDOperation<T> {
 
     public List<T> selectAll(){
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Query query = session.createQuery("select from " + typeOfT.getSimpleName(), typeOfT);
+        Query query = session.createQuery("select from " + typeOfT.getCanonicalName(), typeOfT);
         List<T> list = query.list();
         return list;
     }

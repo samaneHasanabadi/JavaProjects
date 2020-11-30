@@ -19,7 +19,7 @@ public class ManagerInteraction {
                     a = scanner.nextInt();
                     break;
                 case (2):
-                    managerService.reportRestaurantPeykIncomeAndFoodSoldNumber();
+                    managerService.reportRestaurantDeliveryIncomeAndFoodSoldNumber();
                     System.out.println("1.user reports\n2.restaurant report\n3.exit");
                     a = scanner.nextInt();
                     break;

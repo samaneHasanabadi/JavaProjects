@@ -2,6 +2,7 @@ package model.entity;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Restaurant {
@@ -10,14 +11,13 @@ public class Restaurant {
 	private int id;
 	private String name;
 	private int region;
-	private int shipmentPrice;
-	@OneToMany(mappedBy = "restaurant",cascade = CascadeType.ALL)
-	private List<OrderClass> orders = new ArrayList<>();
-	@ElementCollection(targetClass = FoodType.class)
+	private int deliveryAmount;
+	@ElementCollection(targetClass = FoodType.class, fetch = FetchType.EAGER)
 	@Enumerated(EnumType.STRING)
 	private List<FoodType> foodTypes = new ArrayList<>();
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL)
 	private List<Food> foods = new ArrayList<>();
+	private int numberOfOrders;
 
 	public Restaurant(){
 
@@ -26,7 +26,7 @@ public class Restaurant {
 	public Restaurant(String name, int region, int shipmentPrice) {
 		this.name = name;
 		this.region = region;
-		this.shipmentPrice = shipmentPrice;
+		this.deliveryAmount = shipmentPrice;
 	}
 
 	public void setFoodTypes(List<FoodType> foodTypes) {
@@ -65,12 +65,12 @@ public class Restaurant {
 		this.region = region;
 	}
 	
-	public int getShipmentPrice() {
-		return shipmentPrice;
+	public int getDeliveryAmount() {
+		return deliveryAmount;
 	}
 	
-	public void setShipmentPrice(int shipmentPrice) {
-		this.shipmentPrice = shipmentPrice;
+	public void setDeliveryAmount(int shipmentPrice) {
+		this.deliveryAmount = shipmentPrice;
 	}
 	
 	public List<FoodType> getFoodTypes() {
@@ -81,11 +81,30 @@ public class Restaurant {
 		return foods;
 	}
 
-	public List<OrderClass> getOrders() {
-		return orders;
+	public int getNumberOfOrders() {
+		return numberOfOrders;
 	}
 
-	public void setOrders(List<OrderClass> orders) {
-		this.orders = orders;
+	public void setNumberOfOrders(int numberOfOrders) {
+		this.numberOfOrders = numberOfOrders;
+	}
+
+	public int getDeliveryIncome(){
+		return numberOfOrders * deliveryAmount;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Restaurant that = (Restaurant) o;
+		return  region == that.region &&
+				deliveryAmount == that.deliveryAmount &&
+				Objects.equals(name, that.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, name, region, deliveryAmount, foodTypes, foods, numberOfOrders);
 	}
 }

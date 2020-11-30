@@ -17,7 +17,5 @@
         <mapping class="model.entity.Basket"/>
         <mapping class="model.entity.Food"/>
         <mapping class="model.entity.Manager"/>
-        <mapping class="model.entity.OrderClass"/>
-        <mapping class="model.entity.FoodCountMapping"/>
     </session-factory>
 </hibernate-configuration>

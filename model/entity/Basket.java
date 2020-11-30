@@ -14,9 +14,10 @@ public class Basket {
 	@MapKeyColumn(name = "food_name")
 	@Column(name = "number")
 	private Map<Food, Integer> items = new HashMap<>();
-	private String restaurantName;
-	@OneToOne
-	private User user;
+	@ManyToOne
+	private Restaurant restaurant;
+	private boolean isInvoiced = false;
+	private int wholePrice;
 
 	public Basket() {
 	}
@@ -29,14 +30,6 @@ public class Basket {
 		this.id = id;
 	}
 
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
 	public Map<Food, Integer> getItems() {
 		return items;
 	}
@@ -45,11 +38,27 @@ public class Basket {
 		this.items = items;
 	}
 
-	public String getRestaurantName() {
-		return restaurantName;
+	public Restaurant getRestaurant() {
+		return restaurant;
 	}
 
-	public void setRestaurantName(String restaurantName) {
-		this.restaurantName = restaurantName;
+	public void setRestaurant(Restaurant restaurant) {
+		this.restaurant = restaurant;
+	}
+
+	public boolean isInvoiced() {
+		return isInvoiced;
+	}
+
+	public void setInvoiced(boolean invoiced) {
+		isInvoiced = invoiced;
+	}
+
+	public int getWholePrice() {
+		return wholePrice;
+	}
+
+	public void setWholePrice(int wholePrice) {
+		this.wholePrice = wholePrice;
 	}
 }

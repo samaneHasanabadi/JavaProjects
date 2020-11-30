@@ -1,17 +1,21 @@
 package service;
 
+import exceptions.MoreThanOneRestaurantInBasketException;
+import exceptions.NoSuchFoodInBasketException;
 import model.entity.*;
+import model.repository.BasketRepository;
 import model.repository.UserRepository;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Set;
 
 public class UserService {
     private UserRepository userRepository = new UserRepository();
+    private BasketRepository basketRepository = new BasketRepository();
+    private BasketService basketService = new BasketService();
     public User getUserInfo(User user){
         return userRepository.getUserInfo(user);
     }
@@ -20,71 +24,45 @@ public class UserService {
         userRepository.SetUserInfo(user);
     }
 
-    public void addUserToDB(User user){
-        userRepository.addUser(user);
-    }
-
-    public boolean addFoodToBasket(User user, Food food, int number, String restaurant) {
-        boolean restaurentCheck = false;
-        if (user.getBasket().getItems().isEmpty() || restaurant.equals(user.getBasket()
-                .getRestaurantName())) {
-            user.getBasket().getItems().put(food, number);
-            user.setBasketPrice(user.getBasketPrice() + food.getPrice() * number);
-            user.getBasket().setRestaurantName(restaurant);
-            restaurentCheck = true;
+    public User addUserToDB(User user){
+        User dbUser = userRepository.getUserByMobileNumberAndBasket(user.getMobileNumber());
+        if(dbUser == null){
+            dbUser = userRepository.getUserByMobileNumber(user.getMobileNumber());
+            if(dbUser == null) {
+                userRepository.addUser(user);
+            }else {
+                user = dbUser;
+            }
+        }else {
+            user = dbUser;
         }
-        return restaurentCheck;
+        return user;
     }
 
-    public boolean removeFoodFromBasket(User user,Food food) {
-        boolean success = false;
-        try {
-            user.setBasketPrice(user.getBasketPrice() - food.getPrice() * user.getBasket().
-                    getItems().get(food));
-            user.getBasket().getItems().remove(food);
-            success = true;
-        } catch (NullPointerException e) {
-            success = false;
+    public void addFoodToBasket(User user, Food food, int number, Restaurant restaurant) throws Exception {
+        if (user.getBasket().getItems().isEmpty() || restaurant.getName().equals(user.getBasket()
+                .getRestaurant().getName())) {
+            basketService.addFood(user.getBasket(),food, number);
+            user.getBasket().setRestaurant(restaurant);
+            basketRepository.update(user.getBasket());
+        }else {
+            throw new MoreThanOneRestaurantInBasketException();
         }
-        return success;
     }
 
-    public boolean modifyFoodNumberInBasket(User user,Food food, int newNumber) {
-        boolean foodExistence = false;
-        try {
-            user.setBasketPrice(user.getBasketPrice() - food.getPrice() * user.getBasket()
-                    .getItems().get(food));
-            user.getBasket().getItems().put(food, newNumber);
-            user.setBasketPrice(user.getBasketPrice() + food.getPrice() * newNumber);
-            foodExistence = true;
-        } catch (NullPointerException e) {
-            foodExistence = false;
-        }
-        return foodExistence;
+    public void removeFoodFromBasket(User user,Food food) throws NoSuchFoodInBasketException {
+        basketService.removeFood(user.getBasket(), food);
+        basketRepository.update(user.getBasket());
     }
 
-    public OrderClass setOrder(User user) {
-        OrderClass order = new OrderClass();
-        user.getBasket().getItems().entrySet().stream().forEach(a->{
-            FoodCountMapping foodCountMapping = new FoodCountMapping();
-            foodCountMapping.setFood(a.getKey());
-            foodCountMapping.setNumber(a.getValue());
-            foodCountMapping.setOrderClass(order);
-            order.getItems().add(foodCountMapping);
-        });
-        order.setOrderNumber((int)Math.random()*1000);
-        String restaurantName = user.getBasket().getRestaurantName();
-        RestaurantService restaurantService = new RestaurantService();
-        Restaurant restaurant = restaurantService.getRestaurantByName(restaurantName);
-        order.setRestaurant(restaurant);
-        order.setUser(user);
-        order.setWholePrice(user.getBasketPrice());
-        return order;
+    public void modifyFoodNumberInBasket(User user,Food food, int newNumber) throws Exception {
+        basketService.modifyFoodNumber(user.getBasket(), food, newNumber);
+        basketRepository.update(user.getBasket());
     }
 
-    public void addOrderToUser(User user, OrderClass order){
-        user.getOrders().add(order);
-        userRepository.update(user);
+    public void setOrder(User user) {
+        user.getBasket().setInvoiced(true);
+        basketRepository.creat(user.getBasket());
     }
 
     public void saveInvoice(User user) {
@@ -92,8 +70,7 @@ public class UserService {
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             BufferedWriter fileWiter = new BufferedWriter(new FileWriter("//home//samane//" +
                     "Homwork7-OnlineFoodOrder//"+user.getName()+ "_"+ ts.toString() +".txt"));
-            fileWiter.write("Order Number: " + user.getOrders().get(user.getOrders()
-                    .size() - 1).getOrderNumber());
+            fileWiter.write("Order Number: " + user.getBasket().getId());
             fileWiter.newLine();
             fileWiter.write("User Name: " + user.getName());
             fileWiter.newLine();
@@ -103,7 +80,7 @@ public class UserService {
             fileWiter.newLine();
             fileWiter.write("User Mobile Number: " + user.getMobileNumber());
             fileWiter.newLine();
-            fileWiter.write("Restaurant Name: " + user.getBasket().getRestaurantName());
+            fileWiter.write("Restaurant Name: " + user.getBasket().getRestaurant().getName());
             fileWiter.newLine();
             fileWiter.write("Food Name\t\tPrice\t\tNumber");
             fileWiter.newLine();
@@ -113,7 +90,7 @@ public class UserService {
                         user.getBasket().getItems().get(food));
                 fileWiter.newLine();
             }
-            fileWiter.write("Whole Price: " + user.getBasketPrice());
+            fileWiter.write("Whole Price: " + user.getBasket().getWholePrice());
             fileWiter.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -122,10 +99,8 @@ public class UserService {
 
     public void clearBasket(User user){
         user.setBasket(new Basket());
-        user.setBasketPrice(0);
+        basketRepository.creat(user.getBasket());
+        userRepository.update(user);
     }
 
-    public List<User> selectAllUsers(){
-        return userRepository.selectAll();
-    }
 }

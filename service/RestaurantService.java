@@ -1,5 +1,6 @@
 package service;
 
+import exceptions.*;
 import model.entity.Food;
 import model.entity.FoodType;
 import model.entity.Restaurant;
@@ -15,7 +16,16 @@ public class RestaurantService {
     private RestaurantRepository restaurantRepository = new RestaurantRepository();
     private FoodService foodService = new FoodService();
 
-    public void save (Restaurant restaurant){
+    public void save (Restaurant restaurant) throws Exception{
+        if(restaurant.getDeliveryAmount() < 0){
+            throw new NegativeDeliveryAmountException();
+        }
+        if(restaurant.getRegion() < 0){
+            throw  new NegativeRegionException();
+        }
+        if(restaurantRepository.getRestaurantByName(restaurant.getName()) != null){
+            throw new DuplicateRestaurantException();
+        }
         restaurantRepository.creat(restaurant);
     }
 
@@ -31,13 +41,16 @@ public class RestaurantService {
         result[1] = line;
         return result;
     }
-    public void WriteRestaurantsInfoInDB() {
+    public void WriteRestaurantsInfoInDB() throws Exception {
         try {
+            System.out.println("in");
             Reader fileReader = new FileReader("//home//samane//Homwork7-OnlineFoodOrder" +
                     "//restaurants.txt");
+            System.out.println("in");
             BufferedReader bufferReader = new BufferedReader(fileReader);
             String line = bufferReader.readLine();
             int restaurantCount = Integer.parseInt(line);
+            System.out.println(restaurantCount);
             line = bufferReader.readLine();
             for (int i = 0; i < restaurantCount; i++) {
                 String[] result = subStringReturn(line);
@@ -64,44 +77,68 @@ public class RestaurantService {
                     food.setName(foodName);
                     food.setType(type);
                     food.setPrice(price);
+                    System.out.println("in");
+                    System.out.println(food.getName());
+                    System.out.println(restaurant.getName());
                     addFood(restaurant, food);
+                    System.out.println("out");
                 }
+                System.out.println("in");
                 save(restaurant);
                 line = bufferReader.readLine();
             }
             bufferReader.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void addFood(Restaurant restaurant,Food food) {
-        for(int i = 0; i < restaurant.getFoods().size(); i++) {
-            if(restaurant.getFoods().get(i).getName().equals(food.getName()))
-                return;
-        }
-        foodService.addFood(food);
+    public void addFood(Restaurant restaurant,Food food) throws Exception {
+        foodService.addFood(food, restaurant);
         restaurant.getFoods().add(food);
-        addFoodType(restaurant, food.getType());
+        try {
+            addFoodType(restaurant, food.getType());
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+
     }
 
-    public void addFoodType(Restaurant restaurant,FoodType type) {
+    public void addFoodType(Restaurant restaurant,FoodType type) throws DuplicateFoodTypeException {
         if(!restaurant.getFoodTypes().contains(type)) {
             restaurant.getFoodTypes().add(type);
+        }else{
+            throw new DuplicateFoodTypeException();
         }
     }
 
-    public List<Restaurant> getRestaurantsInRegion(int region) {
-        List<Restaurant> restaurants = restaurantRepository.getRestaurantsInARegion(region);
+    public List<Restaurant> getRestaurantsInRegion(int region) throws NegativeRegionException {
+        if(region < 0){
+            throw new NegativeRegionException();
+        }
+        List<Restaurant> restaurants = restaurantRepository.
+                getRestaurantByRegionAndFoodType(region, null);
         return restaurants;
     }
 
-    public List<Restaurant> getRestaurantsInRegionWithFoodType(int region, String foodType) {
+    public List<Restaurant> getRestaurantsInRegionWithFoodType(int region, String foodType) throws Exception {
+        if(region < 0){
+            throw new NegativeRegionException();
+        }
+        try{
+            FoodType.valueOf(foodType);
+        }catch (Exception e){
+            throw new NoSuchFoodTypeException();
+        }
         List<Restaurant> restaurants = restaurantRepository.
-                getRestaurantsInARegionWithType(region, foodType);
+                getRestaurantByRegionAndFoodType(region, foodType);
         return restaurants;
     }
-    public Restaurant getRestaurantByName(String restaurantName) {
-        return restaurantRepository.getRestaurantByName(restaurantName);
+    public Restaurant getRestaurantByName(String restaurantName) throws NoSuchRestaurantException {
+        Restaurant restaurant = restaurantRepository.getRestaurantByName(restaurantName);
+        if(restaurant == null){
+            throw new NoSuchRestaurantException();
+        }
+        return restaurant;
     }
 }

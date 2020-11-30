@@ -4,7 +4,7 @@ import model.entity.Food;
 
 public class OrderDto {
     private Food food;
-    private Long numberSold;
+    private Long sumOfFoodSold;
 
     public Food getFood() {
         return food;
@@ -14,13 +14,11 @@ public class OrderDto {
         this.food = food;
     }
 
-    public Long getNumberSold() {
-        return numberSold;
+    public Long getSumOfFoodSold() {
+        return sumOfFoodSold;
     }
 
-    public void setNumberSold(Long numberSold) {
-        this.numberSold = numberSold;
+    public void setSumOfFoodSold(Long sumOfFoodSold) {
+        this.sumOfFoodSold = sumOfFoodSold;
     }
-
-
 }

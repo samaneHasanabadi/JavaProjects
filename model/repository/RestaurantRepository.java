@@ -1,58 +1,73 @@
 package model.repository;
 
-import model.entity.Food;
 import model.entity.FoodType;
 import model.entity.Restaurant;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import view.UserInteraction;
+import org.hibernate.sql.JoinType;
+import org.hibernate.transform.Transformers;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RestaurantRepository extends CRUDOperation<Restaurant> {
-    Logger logger = LoggerFactory.getLogger(UserInteraction.class);
 
-    public List<Restaurant> getRestaurantsInARegion(int region) {
+
+    public List<Restaurant> getRestaurantByRegionAndFoodType(Integer region, String foodType){
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Query query = session.createQuery("select distinct restaurant from Restaurant " +
-                "restaurant join fetch restaurant.foodTypes where restaurant.region =:region",
-                Restaurant.class);
-        query.setParameter("region", region);
-        List<Restaurant> restaurants = query.list();
+        Transaction transaction = session.beginTransaction();
+        Criteria criteria = session.createCriteria(Restaurant.class);
+        if(region != null) {
+            addRegionRestriction(region, criteria);
+        }
+        if(foodType != null) {
+            addFoodTypeRestriction(foodType, criteria);
+        }
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        List<Restaurant> restaurants = criteria.list();
+        transaction.commit();
+        session.close();
         return restaurants;
     }
 
-    public List<Restaurant> getRestaurantsInARegionWithType(int region, String foodType) {
-        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Query<Restaurant> query = session.createQuery("select distinct restaurant from " +
-                "Restaurant restaurant join fetch restaurant.foodTypes join" +
-                " restaurant.foods food where restaurant.region =: r and food.type =: type"
-                , Restaurant.class);
-        query.setParameter("r", region);
-        query.setParameter("type", FoodType.valueOf(foodType));
-        List<Restaurant> restaurants = query.list();
-        session.close();
-        return restaurants;
+    private void addRegionRestriction(Integer region, Criteria criteria) {
+        criteria.add(Restrictions.eq("region", region));
+    }
+
+    private void addFoodTypeRestriction(String foodType, Criteria criteria) {
+        criteria.createAlias("foodTypes", "foodTypes");
+        criteria.add(Restrictions.in("foodTypes", FoodType.valueOf(foodType)));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
     }
 
     public Restaurant getRestaurantByName(String restaurantName) {
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        logger.trace("session opened");
-        Query query = session.createQuery("from Restaurant restaurant " +
-                "where restaurant.name = :n");
-        query.setParameter("n", restaurantName);
-        List<Restaurant> restaurants = (List<Restaurant>) query.list();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery(prepareQueryByRestaurantName());
+        setRestaurantNameParameter(restaurantName, query);
+        Restaurant restaurant = (Restaurant) query.uniqueResult();
+        transaction.commit();
         session.close();
-        logger.trace("session closed");
-        return restaurants.get(0);
+        return restaurant;
     }
 
-    public List<Restaurant> selectAll(){
-        List<Restaurant> restaurants = selectAll();
-        return restaurants;
+    private void setRestaurantNameParameter(String restaurantName, Query query) {
+        query.setParameter("restaurantName", restaurantName);
+    }
+
+    private String prepareQueryByRestaurantName() {
+        return "select distinct restaurant from Restaurant restaurant join fetch restaurant.foods where " +
+                "restaurant.name = :restaurantName";
+    }
+
+    @Override
+    public List<Restaurant> selectAll() {
+        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
+        Query query = session.createQuery("select restaurant from Restaurant restaurant", Restaurant.class);
+        List<Restaurant> list = query.list();
+        return list;
     }
 }
