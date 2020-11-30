@@ -12,8 +12,13 @@ import java.io.Reader;
 import java.util.List;
 
 public class RestaurantService {
-    private RestaurantRepository restaurantRepository = new RestaurantRepository();
-    private FoodService foodService = new FoodService();
+    private RestaurantRepository restaurantRepository;
+    private FoodService foodService;
+
+    public RestaurantService(RestaurantRepository restaurantRepository, FoodService foodService){
+        this.restaurantRepository = restaurantRepository;
+        this.foodService = foodService;
+    }
 
     public void save (Restaurant restaurant) throws Exception{
         if(restaurant.getDeliveryAmount() < 0){

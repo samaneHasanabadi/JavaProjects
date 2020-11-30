@@ -5,14 +5,13 @@ import model.entity.Restaurant;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.sql.JoinType;
-import org.hibernate.transform.Transformers;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class RestaurantRepository extends CRUDOperation<Restaurant> {
 
 

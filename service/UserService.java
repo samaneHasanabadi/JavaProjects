@@ -13,9 +13,17 @@ import java.sql.Timestamp;
 import java.util.Set;
 
 public class UserService {
-    private UserRepository userRepository = new UserRepository();
-    private BasketRepository basketRepository = new BasketRepository();
-    private BasketService basketService = new BasketService();
+
+    private UserRepository userRepository;
+    private BasketRepository basketRepository;
+    private BasketService basketService;
+
+    public UserService(UserRepository userRepository, BasketRepository basketRepository, BasketService basketService){
+        this.userRepository = userRepository;
+        this.basketRepository = basketRepository;
+        this.basketService = basketService;
+    }
+
     public User getUserInfo(User user){
         return userRepository.getUserInfo(user);
     }

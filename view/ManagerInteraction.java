@@ -5,7 +5,11 @@ import service.ManagerService;
 import java.util.Scanner;
 
 public class ManagerInteraction {
-    private ManagerService managerService = new ManagerService();
+    private ManagerService managerService;
+
+    public ManagerInteraction(ManagerService managerService){
+        this.managerService = managerService;
+    }
 
     public void managerWorks(){
         Scanner scanner = new Scanner(System.in);

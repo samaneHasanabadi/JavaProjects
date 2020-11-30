@@ -8,10 +8,13 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.hibernate.transform.Transformers;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class ManagerRepository extends CRUDOperation<Manager> {
 
     public List<BasketDto> getUsersWithSumOfOrdersPrice(){
@@ -62,10 +65,9 @@ public class ManagerRepository extends CRUDOperation<Manager> {
         Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         Query query = session.createQuery(getQueryForSumOfFood());
-        query.setParameter("restaurantId", 4);
+        query.setParameter("restaurantId", restaurantId);
         query.setResultTransformer(Transformers.aliasToBean(OrderDto.class));
         List<OrderDto> orders = query.list();
-        System.out.println(orders.get(0).getFood().getName());
         transaction.commit();
         session.close();
         return orders;

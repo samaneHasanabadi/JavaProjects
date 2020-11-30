@@ -10,12 +10,18 @@ import java.util.List;
 import java.util.Scanner;
 
 public class UserInteraction {
-    RestaurantService restaurantService = new RestaurantService();
-    FoodService foodService = new FoodService();
+    RestaurantService restaurantService;
+    FoodService foodService;
     User user;
-    UserService userService = new UserService();
+    UserService userService;
     String restaurantName = "";
     List<Restaurant> restaurants;
+
+    public UserInteraction(RestaurantService restaurantService, FoodService foodService, UserService userService){
+        this.restaurantService = restaurantService;
+        this.foodService = foodService;
+        this.userService = userService;
+    }
 
     public void userWorks(String mobileNumber) {
         try {

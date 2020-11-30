@@ -12,8 +12,14 @@ import java.util.List;
 
 public class FoodService {
 
-    FoodRepository foodRepository = new FoodRepository();
-    RestaurantRepository restaurantRepository = new RestaurantRepository();
+    FoodRepository foodRepository;
+    RestaurantRepository restaurantRepository;
+
+    public FoodService(FoodRepository foodRepository, RestaurantRepository restaurantRepository) {
+        this.foodRepository = foodRepository;
+        this.restaurantRepository = restaurantRepository;
+
+    }
 
     public List<Food> getFoodsOfARestaurant(String restaurantName) throws NoSuchRestaurantException {
         Restaurant restaurant = restaurantRepository.getRestaurantByName(restaurantName);

@@ -5,9 +5,11 @@ import model.entity.Restaurant;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class FoodRepository extends CRUDOperation<Food> {
 
     public void addFood(Food food) {

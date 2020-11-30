@@ -4,7 +4,9 @@ import model.entity.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserRepository extends CRUDOperation<User> {
 
     public void addUser(User user) {

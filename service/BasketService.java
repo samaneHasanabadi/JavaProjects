@@ -4,8 +4,12 @@ import exceptions.NegativeFoodNumberException;
 import exceptions.NoSuchFoodInBasketException;
 import model.entity.Basket;
 import model.entity.Food;
+import model.repository.BasketRepository;
 
 public class BasketService {
+
+    public BasketService (){
+    }
 
     public void modifyBasketPrice(Basket basket, int amount){
         basket.setWholePrice(basket.getWholePrice() + amount);

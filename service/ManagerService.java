@@ -9,6 +9,12 @@ import java.util.*;
 
 public class ManagerService {
 
+    ManagerRepository managerRepository;
+
+    public ManagerService(ManagerRepository managerRepository){
+        this.managerRepository = managerRepository;
+    }
+
     public boolean checkUsername(String username){
         if(username.equals("01Manager01")){
             return true;
@@ -17,7 +23,6 @@ public class ManagerService {
     }
 
     public void reportUsersWithMonthRegisterationAndSumOfOrderPrice(){
-        ManagerRepository managerRepository = new ManagerRepository();
         for (int i = 1; i < 13; i++){
             List<BasketDto> orders = managerRepository.
                     getUsersWithSumOfOrdersPrice();
@@ -37,7 +42,6 @@ public class ManagerService {
     }
 
     public void reportRestaurantDeliveryIncomeAndFoodSoldNumber(){
-        ManagerRepository managerRepository = new ManagerRepository();
         Map<Restaurant,List<OrderDto>> restaurants = managerRepository.
                 getSumOfFoodSoldInEachRestaurant();
         printRestaurantDeliveryIncomeAndFoodReport(restaurants, 4, 0,
@@ -65,8 +69,10 @@ public class ManagerService {
     }
 
     private static void getFoodReportOfTheRestaurant(Map<Restaurant, List<OrderDto>> restaurants, Optional<Restaurant> restaurant) {
-        restaurants.entrySet().stream().filter(entry -> entry.getKey().getName().equals(restaurant.get().getName())).forEach(entry -> System.out.println(entry.getValue().stream()
-                       .max(Comparator.comparingLong(OrderDto::getSumOfFoodSold)).get().getFood().getName()));
+        if (restaurant.isPresent() && restaurants.get(restaurant.get()).size() != 0) {
+            System.out.println(restaurants.get(restaurant.get()).stream()
+                    .max(Comparator.comparingLong(OrderDto::getSumOfFoodSold)).get().getFood().getName());
+        }
     }
 
     private static Optional<Restaurant> getRestaurantWithMaxDeliveryIncome(Map<Restaurant, List<OrderDto>> restaurants, int region, int minDeliveryIncome, int maxDeliveryIncome) {
