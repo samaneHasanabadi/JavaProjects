@@ -5,6 +5,8 @@ import exceptions.NoSuchFoodInBasketException;
 import model.entity.*;
 import model.repository.BasketRepository;
 import model.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -12,12 +14,14 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Set;
 
+@Service
 public class UserService {
 
     private UserRepository userRepository;
     private BasketRepository basketRepository;
     private BasketService basketService;
 
+    @Autowired
     public UserService(UserRepository userRepository, BasketRepository basketRepository, BasketService basketService){
         this.userRepository = userRepository;
         this.basketRepository = basketRepository;
@@ -25,19 +29,25 @@ public class UserService {
     }
 
     public User getUserInfo(User user){
-        return userRepository.getUserInfo(user);
+        User dbUser = userRepository.getById(user.getId());
+        if(dbUser != null){
+            user.setName(dbUser.getName());
+            user.setPostalCode(dbUser.getPostalCode());
+            user.setAddress(dbUser.getAddress());
+        }
+        return user;
     }
 
     public void setUserInfo(User user){
-        userRepository.SetUserInfo(user);
+        userRepository.save(user);
     }
 
     public User addUserToDB(User user){
-        User dbUser = userRepository.getUserByMobileNumberAndBasket(user.getMobileNumber());
+        User dbUser = userRepository.findByMobileNumberAndBasket_IsInvoiced(user.getMobileNumber(), false);
         if(dbUser == null){
-            dbUser = userRepository.getUserByMobileNumber(user.getMobileNumber());
+            dbUser = userRepository.findByMobileNumber(user.getMobileNumber());
             if(dbUser == null) {
-                userRepository.addUser(user);
+                userRepository.save(user);
             }else {
                 user = dbUser;
             }
@@ -52,7 +62,7 @@ public class UserService {
                 .getRestaurant().getName())) {
             basketService.addFood(user.getBasket(),food, number);
             user.getBasket().setRestaurant(restaurant);
-            basketRepository.update(user.getBasket());
+            basketRepository.save(user.getBasket());
         }else {
             throw new MoreThanOneRestaurantInBasketException();
         }
@@ -60,17 +70,17 @@ public class UserService {
 
     public void removeFoodFromBasket(User user,Food food) throws NoSuchFoodInBasketException {
         basketService.removeFood(user.getBasket(), food);
-        basketRepository.update(user.getBasket());
+        basketRepository.save(user.getBasket());
     }
 
     public void modifyFoodNumberInBasket(User user,Food food, int newNumber) throws Exception {
         basketService.modifyFoodNumber(user.getBasket(), food, newNumber);
-        basketRepository.update(user.getBasket());
+        basketRepository.save(user.getBasket());
     }
 
     public void setOrder(User user) {
         user.getBasket().setInvoiced(true);
-        basketRepository.creat(user.getBasket());
+        basketRepository.save(user.getBasket());
     }
 
     public void saveInvoice(User user) {
@@ -107,8 +117,8 @@ public class UserService {
 
     public void clearBasket(User user){
         user.setBasket(new Basket());
-        basketRepository.creat(user.getBasket());
-        userRepository.update(user);
+        basketRepository.save(user.getBasket());
+        userRepository.save(user);
     }
 
 }

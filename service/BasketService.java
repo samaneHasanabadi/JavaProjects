@@ -4,10 +4,13 @@ import exceptions.NegativeFoodNumberException;
 import exceptions.NoSuchFoodInBasketException;
 import model.entity.Basket;
 import model.entity.Food;
-import model.repository.BasketRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class BasketService {
 
+    @Autowired
     public BasketService (){
     }
 

@@ -3,80 +3,28 @@ package model.repository;
 import model.dto.BasketDto;
 import model.dto.OrderDto;
 import model.entity.Manager;
-import model.entity.Restaurant;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
-import org.hibernate.transform.Transformers;
-import org.springframework.stereotype.Component;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Component
-public class ManagerRepository extends CRUDOperation<Manager> {
+@Repository
+public interface ManagerRepository extends JpaRepository<Manager, Integer> {
 
-    public List<BasketDto> getUsersWithSumOfOrdersPrice(){
-        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        Query query = session.createQuery(getQueryForUserSumOrdersPrice());
-        List<BasketDto> orders = query.setResultTransformer(
-                Transformers.aliasToBean(BasketDto.class)).list();
-        transaction.commit();
-        session.close();
-        return orders;
-    }
+    @Query("select sum(user.basket.wholePrice) as sumOfOrdersPrice, user as user from " +
+            "User user where user.basket.isInvoiced=true " +
+            "group by user.id")
+    List<BasketDto> getUsersWithSumOfOrdersPrice();
 
-    private String getQueryForUserSumOrdersPrice() {
-        return "select sum(user.basket.wholePrice) as sumOfOrdersPrice, user as user from " +
-                "User user where user.basket.isInvoiced=true " +
-                "group by user.id";
-    }
+    @Query("select count(basket) from Basket " +
+            "basket where basket.restaurant.id =:restaurantId")
+    int getNumberOfOrdersOfRestaurant(@Param("restaurantId") int restaurantId);
 
-    public Map<Restaurant,List<OrderDto>> getSumOfFoodSoldInEachRestaurant(){
-        HashMap<Restaurant, List<OrderDto>> restaurantsMapFood = new HashMap<>();
-        List<Restaurant> restaurants = new RestaurantRepository().selectAll();
-        restaurants.stream().forEach(restaurant -> {
-            restaurant.setNumberOfOrders(getNumberOfOrdersOfRestaurant(restaurant.getId()));
-            List<OrderDto> orders = getSumOfFoodOrderForRestaurant(restaurant.getId());
-            restaurantsMapFood.put(restaurant, orders);
-        });
-        return restaurantsMapFood;
-    }
-
-    private int getNumberOfOrdersOfRestaurant(int restaurantId) {
-        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        Query query = session.createQuery(getQueryForNumberOfOrders());
-        query.setParameter("restaurantId", restaurantId);
-        int numberOfOrders = ((Long) query.uniqueResult()).intValue();
-        transaction.commit();
-        session.close();
-        return numberOfOrders;
-    }
-
-    private String getQueryForNumberOfOrders() {
-        return "select count(*) from Basket " +
-                "basket where basket.restaurant.id =:restaurantId";
-    }
-
-    private List<OrderDto> getSumOfFoodOrderForRestaurant(int restaurantId) {
-        Session session = DatabaseConnection.connectionRepository.getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        Query query = session.createQuery(getQueryForSumOfFood());
-        query.setParameter("restaurantId", restaurantId);
-        query.setResultTransformer(Transformers.aliasToBean(OrderDto.class));
-        List<OrderDto> orders = query.list();
-        transaction.commit();
-        session.close();
-        return orders;
-    }
-
-    private String getQueryForSumOfFood() {
-        return "select sum(VALUE(items)) as sumOfFoodSold, key(items) as food from" +
-                " Basket basket join basket.items items where basket.isInvoiced= true and " +
-                "basket.restaurant.id = :restaurantId group by key(items).id ";
-    }
+    @Query("select new model.dto.OrderDto(sum(VALUE(items)), key(items)) from" +
+            " Basket basket join basket.items items where basket.isInvoiced= true and " +
+            "basket.restaurant.id = :restaurantId group by key(items).id")
+    List<OrderDto> getSumOfFoodOrderForRestaurant(@Param("restaurantId") int restaurantId);
 
 }

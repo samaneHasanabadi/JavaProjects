@@ -71,6 +71,6 @@
         <jarDirectory url="file://$USER_HOME$/Java/hibernate-release-5.4.22.Final/lib/required" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="spring-aop-4.2.4.RELEASE-javadoc" level="project" />
+    <orderEntry type="library" name="aspectjrt-1.9.6" level="project" />
   </component>
 </module>

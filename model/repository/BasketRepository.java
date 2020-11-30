@@ -1,12 +1,10 @@
 package model.repository;
 
 import model.entity.Basket;
-import org.springframework.stereotype.Component;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-@Component
-public class BasketRepository extends CRUDOperation<Basket> {
+@Repository
+public interface BasketRepository extends JpaRepository<Basket, Integer> {
 
-    public BasketRepository(){
-
-    }
 }

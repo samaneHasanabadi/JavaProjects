@@ -4,15 +4,22 @@ import model.dto.BasketDto;
 import model.dto.OrderDto;
 import model.entity.Restaurant;
 import model.repository.ManagerRepository;
+import model.repository.RestaurantRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Service
 public class ManagerService {
 
     ManagerRepository managerRepository;
+    RestaurantRepository restaurantRepository;
 
-    public ManagerService(ManagerRepository managerRepository){
+    @Autowired
+    public ManagerService(ManagerRepository managerRepository, RestaurantRepository restaurantRepository){
         this.managerRepository = managerRepository;
+        this.restaurantRepository = restaurantRepository;
     }
 
     public boolean checkUsername(String username){
@@ -20,6 +27,17 @@ public class ManagerService {
             return true;
         }
         return false;
+    }
+
+    public Map<Restaurant,List<OrderDto>> getSumOfFoodSoldInEachRestaurant(){
+        HashMap<Restaurant, List<OrderDto>> restaurantsMapFood = new HashMap<>();
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        restaurants.stream().forEach(restaurant -> {
+            restaurant.setNumberOfOrders(managerRepository.getNumberOfOrdersOfRestaurant(restaurant.getId()));
+            List<OrderDto> orders = managerRepository.getSumOfFoodOrderForRestaurant(restaurant.getId());
+            restaurantsMapFood.put(restaurant, orders);
+        });
+        return restaurantsMapFood;
     }
 
     public void reportUsersWithMonthRegisterationAndSumOfOrderPrice(){
@@ -42,8 +60,7 @@ public class ManagerService {
     }
 
     public void reportRestaurantDeliveryIncomeAndFoodSoldNumber(){
-        Map<Restaurant,List<OrderDto>> restaurants = managerRepository.
-                getSumOfFoodSoldInEachRestaurant();
+        Map<Restaurant,List<OrderDto>> restaurants = getSumOfFoodSoldInEachRestaurant();
         printRestaurantDeliveryIncomeAndFoodReport(restaurants, 4, 0,
                 10001);
         printRestaurantDeliveryIncomeAndFoodReport(restaurants, 4, 10000,

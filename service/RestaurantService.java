@@ -5,16 +5,20 @@ import model.entity.Food;
 import model.entity.FoodType;
 import model.entity.Restaurant;
 import model.repository.RestaurantRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
 import java.util.List;
 
+@Service
 public class RestaurantService {
     private RestaurantRepository restaurantRepository;
     private FoodService foodService;
 
+    @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository, FoodService foodService){
         this.restaurantRepository = restaurantRepository;
         this.foodService = foodService;
@@ -27,10 +31,10 @@ public class RestaurantService {
         if(restaurant.getRegion() < 0){
             throw  new NegativeRegionException();
         }
-        if(restaurantRepository.getRestaurantByName(restaurant.getName()) != null){
+        if(restaurantRepository.findRestaurantByName(restaurant.getName()) != null){
             throw new DuplicateRestaurantException();
         }
-        restaurantRepository.creat(restaurant);
+        restaurantRepository.save(restaurant);
     }
 
     public String[] subStringReturn(String line) {
@@ -113,7 +117,7 @@ public class RestaurantService {
             throw new NegativeRegionException();
         }
         List<Restaurant> restaurants = restaurantRepository.
-                getRestaurantByRegionAndFoodType(region, null);
+                findByRegion(region);
         return restaurants;
     }
 
@@ -127,11 +131,11 @@ public class RestaurantService {
             throw new NoSuchFoodTypeException();
         }
         List<Restaurant> restaurants = restaurantRepository.
-                getRestaurantByRegionAndFoodType(region, foodType);
+                findByRegionAndAndFoodTypes(region, FoodType.valueOf(foodType));
         return restaurants;
     }
     public Restaurant getRestaurantByName(String restaurantName) throws NoSuchRestaurantException {
-        Restaurant restaurant = restaurantRepository.getRestaurantByName(restaurantName);
+        Restaurant restaurant = restaurantRepository.findRestaurantByName(restaurantName);
         if(restaurant == null){
             throw new NoSuchRestaurantException();
         }

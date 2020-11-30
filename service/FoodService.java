@@ -7,14 +7,18 @@ import exceptions.NoSuchRestaurantException;
 import model.entity.Food;
 import model.entity.Restaurant;
 import model.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class FoodService {
 
     FoodRepository foodRepository;
     RestaurantRepository restaurantRepository;
 
+    @Autowired
     public FoodService(FoodRepository foodRepository, RestaurantRepository restaurantRepository) {
         this.foodRepository = foodRepository;
         this.restaurantRepository = restaurantRepository;
@@ -22,7 +26,7 @@ public class FoodService {
     }
 
     public List<Food> getFoodsOfARestaurant(String restaurantName) throws NoSuchRestaurantException {
-        Restaurant restaurant = restaurantRepository.getRestaurantByName(restaurantName);
+        Restaurant restaurant = restaurantRepository.findRestaurantByName(restaurantName);
         if(restaurant == null){
             throw new NoSuchRestaurantException();
         }
@@ -30,7 +34,7 @@ public class FoodService {
     }
 
     public Food getFoodByNameAndRestaurant(String foodName, String restaurantName) throws Exception {
-        if(restaurantRepository.getRestaurantByName(restaurantName)== null){
+        if(restaurantRepository.findRestaurantByName(restaurantName)== null){
             throw new NoSuchRestaurantException();
         }
         Food food = foodRepository.getFoodByNameAndRestaurant(foodName, restaurantName);
@@ -48,7 +52,7 @@ public class FoodService {
         if(foodRepository.getFoodByNameAndRestaurant(food.getName(), restaurant.getName()) != null){
             throw new DuplicateFoodException();
         }
-        foodRepository.addFood(food);
+        foodRepository.save(food);
     }
 
 }

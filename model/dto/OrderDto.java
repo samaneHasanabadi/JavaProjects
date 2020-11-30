@@ -6,6 +6,11 @@ public class OrderDto {
     private Food food;
     private Long sumOfFoodSold;
 
+    public OrderDto(Long sumOfFoodSold, Food food){
+        this.food = food;
+        this.sumOfFoodSold = sumOfFoodSold;
+    }
+
     public Food getFood() {
         return food;
     }
